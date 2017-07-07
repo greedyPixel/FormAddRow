@@ -444,7 +444,7 @@
 				formTarget.removeAttr('templateName');
 				if(type != 'new' || type == 'populated'){
 					$.each(rowData[rowNum], function(index,element){
-						if(formTemplateName == element.name){
+						if(element.name.match('^' + formTemplateName)){
 							formTarget.val(element.value);
 							formTarget.attr('value',element.value);
 							// check to see if form object is a select
