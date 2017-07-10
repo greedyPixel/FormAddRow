@@ -10,7 +10,7 @@
             url: '',
 			dataType: 'json',
 			title: '',
-			loaded: function(){},
+			loaded: function(data){},
 			destroy: false
         }, options );
  
@@ -213,7 +213,7 @@
 			var d = $.Deferred();
 			
 			//Add after build functions
-			settings.loaded();
+			settings.loaded(rowData);
 			
 			d.resolve();			
 			

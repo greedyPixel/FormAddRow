@@ -15,6 +15,12 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <style type="text/css">
+		.code-window {
+			max-height: 200px;
+			overflow-y: scroll;
+		}
+	</style>
 </head>
 <body>
 	<nav class="navbar navbar-inverse">
@@ -213,6 +219,24 @@
 					<!-- End Address Add Form Row 2-->
 				</div>
 				<!-- End Address Add Form Row Container -->
+				<div class="row">
+					<div class="col-md-12">
+						<ul class="nav nav-tabs">
+							<li class="active"><a data-toggle="tab" href="#addressHtml">HTML</a></li>
+							<li><a data-toggle="tab" href="#addressJs">JavaScript</a></li>
+						</ul>
+						<div class="tab-content">
+							<div id="addressHtml" class="tab-pane fade in active code-window">
+								
+							</div>
+							<div id="addressJs" class="tab-pane fade code-window">
+								<figure class="highlight"><pre><code class="language-html" data-lang="html">$('#addressForm').FormAddRow({<br>	loaded: function(){<br>		// do something after form add row is generated<br>	}<br>});</code></pre></figure>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!---<figure class="highlight"><pre><code class="language-html" data-lang="html">You can use the mark tag to <span class="nt">&lt;mark&gt;</span>highlight<span class="nt">&lt;/mark&gt;</span> text.</code></pre></figure>-->
+				
 				<div class="row" id="jsonDataForm">
 					<div class="col-md-12">
 						<h2>Add A Form Row Using <abbr title="JavaScript Object Notation">JSON</abbr> Data </h2>
@@ -251,6 +275,26 @@
 						</div>
 					</div>
 				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<ul class="nav nav-tabs">
+							<li class="active"><a data-toggle="tab" href="#phoneHtml">HTML</a></li>
+							<li><a data-toggle="tab" href="#phoneJs">JavaScript</a></li>
+							<li><a data-toggle="tab" href="#phoneJson">JSON</a></li>
+						</ul>
+						<div class="tab-content">
+							<div id="phoneHtml" class="tab-pane fade in active code-window">
+								
+							</div>
+							<div id="phoneJs" class="tab-pane fade code-window">
+								<figure class="highlight"><pre><code class="language-html" data-lang="html">$('#phoneForm').FormAddRow({<br>	dataType: "json",<br>	url: "assets/data/phones.json",<br>	data: "data",<br>	title: "Phone(s)",<br>	loaded: function(data){<br>		// load something after form add row is finished loading.<br>	}<br>});</code></pre></figure>
+							</div>
+  							<div id="phoneJson" class="tab-pane fade code-window">
+								<p>Click the "Generate Form Add Row Button" to see JSON object format.</p>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<hr>
@@ -268,12 +312,24 @@
 <script src="libs/jquery-ui-1.12.1/external/jquery/jquery.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed --> 
 <script src="libs/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+<script src="assets/js/helpers.js"></script>
 <script src="dist/js/FormAddRow.js"></script>
 <script type="text/javascript">
 	$( document ).ready(function() {
     	getStates('select[data-type="state"]','MD');
 		//getPhones();
-		
+		$('#phoneForm').displayHTML({
+			destination: '#phoneHtml',
+			loaded: function(){
+				
+			}
+		});
+		$('#addressForm').displayHTML({
+			destination: '#addressHtml',
+			loaded: function(){
+				
+			}
+		});
 	});
 	function getStates(target,selected){
 		if( typeof target === 'undefined' || target === null ){
@@ -353,7 +409,7 @@
 						$(this).text(message2);
 						$('#addressForm').FormAddRow({
 							loaded: function(){
-							console.log('I built some addresses');
+								// do something after form add row is generated
 							}
 						});
 					} else { // Destroy
@@ -377,8 +433,12 @@
 							url: "assets/data/phones.json",
 							data: "data",
 							title: "Phone(s)",
-							loaded: function(){
-								console.log('phones built');
+							loaded: function(data){
+								$('#phoneJson').empty();
+								var jsonObect = '<figure class="highlight"><pre><code class="language-html" data-lang="html">'
+									+ JSON.stringify(data)
+									+  '</code></pre></figure>';
+								$('#phoneJson').append(jsonObect);
 							}
 						});
 					} else { // Destroy
