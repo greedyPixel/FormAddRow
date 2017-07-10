@@ -46,12 +46,22 @@
 						<ul class="dropdown-menu" role="menu">
 							<li><a href="#existingDomData">Add A Form Row Using Existing Data in the <abbr title="document object model">DOM</abbr></a></li>
 							<li><a href="#jsonDataForm">Add A Form Row Using <abbr title="JavaScript Object Notation">JSON</abbr> Data</a></li>
-							<li class="divider"></li>
+							<!--<li class="divider"></li>
 							<li><a href="#">Email Add Form Row</a></li>
 							<li class="divider"></li>
-							<li><a href="#">Other Add Form Row</a></li>
+							<li><a href="#">Other Add Form Row</a></li>-->
 						</ul>
 					</li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+							Getting Started<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#startedSection">Getting Started</a></li>
+							<li><a href="#dependenciesSection">Dependencies</a></li>
+						</ul>
+					</li>
+					
 				</ul>
 				<form class="navbar-form navbar-left" role="search">
 					<div class="form-group">
@@ -88,7 +98,9 @@
 		<div class="row text-center">
 			<div class="col-md-6 col-md-offset-3">
 				The <strong>Form Add Row</strong> plugin allows a developer to generate
-				add a row functionality to a group of form elements. Instructions for setting up the <strong>Form Add Row</strong> plugin are simple to follow. 
+				add a row functionality to a group of form elements. Instructions for setting up the <strong>Form Add Row</strong> plugin are simple to follow.
+				<br>
+				<a href="dist/js/FormAddRow.js" class="btn btn-primary btn-lg">Download formAddRow.js</a>
 			</div>
 		</div> 
 		<hr>
@@ -293,6 +305,71 @@
 								<p>Click the "Generate Form Add Row Button" to see JSON object format.</p>
 							</div>
 						</div>
+					</div>
+				</div>
+				<hr>
+				<div class="row" id="startedSection">
+					<div class="col-md-12">
+						<h2>Getting Started</h2>
+						<p>Getting started is easy.</p>
+						<ol class="">
+							<li>
+								Download the plugin and ensure you have the dependent libraries also.
+							</li>
+							<li>
+								Install/Reference the formAddRow.js plugin and ensure you have the dependent libraries also installed/referenced.
+							</li>
+							<li>
+								Place your HTML code into DIVs for the container and the row using the "addFormRowContainer" (used for the container of the form rows) and "addFormRow" (used for each form row) classes as shown below.
+								<ul class="list-unstyled">
+									<li>
+										<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;div id="myFormRow" class="<i class="text-success">addFormRowContainer</i>"&gt;</span><br>	&lt;!-- Start the first row here. --&gt;<br>	<span class="nt">&lt;div class="<i class="text-success">addFormRow</i>"&gt;</span><br>		&lt;!-- Add form HTML for your add row here. --&gt;<br>	<span class="nt">&lt;/div&gt;</span><br>	&lt;!-- End the first row here. --&gt;<br><span class="nt">&lt;/div&gt;</span></code></pre></figure>
+									</li>
+								</ul>
+							</li>
+							<li>
+								Add the JavaScript to call the plugin and set the url, data, dataType, title, loaded, and destroy. 
+								<ul class="list-unstyled">
+									<li>
+										<figure class="highlight"><pre><code class="language-html" data-lang="html">$(document).ready(function(){ <span class="text-muted">//Ensure the plugin is only called after the page is ready.</span><br>	$('#myFormRow').FormAddRow({<br>		dataType: "json", <span class="text-muted">//Select the dataType for specific ajax calls (optional)</span><br>		url: "assets/data/phones.json", <span class="text-muted">//Select the url for an ajax call (optiona)</span><br>		data: "data", <span class="text-muted">//Select the root data element for the data</span><br>		title: "Form Row(s)", <span class="text-muted">//Add a legend title to the add form row</span><br>		loaded: function(data){ <span class="text-muted">//data = the loaded data to the plugin</span><br>			<span class="text-muted">//Do something after the plugin is loaded</span><br>		}<br>	});<br>});</code></pre></figure>
+									</li>
+									<li>
+										Note: The plugin can also pull in looped data from the website since the rows are built after the document is ready.
+									</li>
+								</ul>
+							</li>
+							
+						</ol>
+					</div>
+				</div>
+				<div class="row" id="dependenciesSection">
+					<div class="col-md-12">
+						<h3>Dependencies</h3>
+						<p>The formAddRow.js plugin has the following dependencies:</p>
+						<ul class="list-unstyled">
+							<li>
+								<strong>Twitter Bootstrap 3.3.7</strong>
+								<ul>
+									<li>
+										https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css
+									</li>
+									<li>
+										https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js
+									</li>
+								</ul>
+							</li>
+							<li>
+								<strong>JQuery <em>(1.10+)</em></strong>
+								<ul>
+									<li>
+										https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js
+									</li>
+									<li>
+										https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
+									</li>
+								</ul>
+							</li>
+						</ul>
 					</div>
 				</div>
 			</div>
