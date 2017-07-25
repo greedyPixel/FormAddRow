@@ -11,6 +11,7 @@
 			dataType: 'json',
 			title: '',
 			loaded: function(data){},
+			bracketArray: false,
 			destroy: false
         }, options );
  
@@ -63,6 +64,7 @@
 		var assignAjaxData = function(dataSource) {
 			if(settings.data != ''){
 				var dataHandle = settings.data;
+				//console.log(dataSource);
 				rowData = dataSource[dataHandle];
 				promise = buildTemplate().then(buildTemplateRow).then(buildExistingRows).then(afterRowsBuilt); 
 			}			
@@ -139,7 +141,7 @@
 				// increment the counter
 				dataCounter++;										
 			});
-			
+			//console.log(JSON.stringify(rowData));
 			d.resolve(); 
 			return d.promise(); //promise(): Return a Deferredâ€™s Promise object.
 
@@ -195,7 +197,7 @@
 				cloneRow(true);
 			});
 			$('#add_' + $thisId + 'Row').on('click', function(event){
-				cloneRow('new');
+				cloneRow(false);
 			});
 			/*
 			 * Step 4 - Create a standard delete a row function. 
@@ -259,7 +261,6 @@
 		
 		//$(this).children().clone().prop({ id: "newId", name: "newName"});
 		//console.log($thisContent);
-
 		
 		if($totalRows > 0){
 			//alert('true')
@@ -318,12 +319,13 @@
 				type = 'new'; // Types are template, new, populated
 			}
 			
+			
+			
 			// handle hidden inputs
 			if($(target).attr('type') == 'hidden'){
 				var formTarget = $(target);
 			} else {
-				var formTarget = $(target).find('.form-control');
-				
+				var formTarget = $(target).find('.form-control');				
 			}
 			
 			var formElementId = '';
@@ -332,10 +334,16 @@
 				var rowIdIncrement = '';
 				var rowNameIncrement = '';
 			} else {
+				if(increment >= 1){
+					increment = cloneCount - 1;
+				}
 				var rowIdIncrement = '_' + increment;
-				var rowNameIncrement = '.' + increment;
+				var rowNameIncrement = '' + increment;
 			}
 			
+			function hasBrackets(str) {
+				return /\[.*?\]/.test(str);
+			}
 			
 			var rowNum = increment - 1; // used for data population
 			
@@ -349,9 +357,32 @@
 						if($(element).attr('name').indexOf('.') > -1){
 							var formName = $(element).attr('name');
 							var nameLength =  $(element).attr('name').split(".").pop().length + 1;
-							elementName = formName.substring(0,formName.length - nameLength);
+							var arrayName = $(element).attr('name').split(".");
+							var nameSpaceLength = $(element).attr('name').split(".").length -1;
+							//console.log(nameSpaceLength);
+							//console.log('namespace length: ' + nameSpaceLength)
+							var newName = '';
+							$.each(arrayName, function(indx,elem){
+								//console.log(elem + ' [' + indx + ']');
+								if(indx < nameSpaceLength -2){
+									newName += elem + '.';
+								} else if(indx == nameSpaceLength -1 ){
+									if(hasBrackets(elem)){
+										newName += '.' + elem.replace(/\[.*?\]/, "") + '.' + '0.';	
+									} else {
+										newName += '.' + elem + '.';
+									}							
+								} else {
+									newName += elem;
+								}
+							});
+							//console.log(newName);
+							//elementName = formName.substring(0,formName.length - nameLength);
+							//console.log(formName.substring(0,formName.length - nameLength);)
+							//console.log(elementName);
 						}
-						$(element).attr('templateName',elementName);
+						$(element).attr('templateName',newName);
+						//$(element).attr('templateName',elementName);
 						$(element).removeAttr('name');
 						$(element).removeAttr('checked');
 						
@@ -363,25 +394,53 @@
 							}
 						}
 					} else {
-						var templateName = $(element).attr('templateName');
-						$(element).attr('name',templateName + rowNameIncrement);
-						$(element).removeAttr('templateName');
-						if(type != 'new' || type == 'populated'){
-							$.each(rowData[rowNum], function(idx,elem){
-								//console.log(elem.name + '[' + idx + '] = "' + elem.value + '"');
-								if(templateName == elem.name && $(element).val() == elem.value){ //
-									// Check the selected radio and check boxes
-									$(element).prop('checked','checked');
+						
+						if($(element).attr('templateName')){
+							var templateName = $(element).attr('templateName');
+							var arrayName = $(element).attr('templateName').split(".");
+							var nameSpaceLength = $(element).attr('templateName').split(".").length -1;
+							//console.log(templateName);
+							//console.log('namespace length: ' + nameSpaceLength)
+							var newName = '';
+							$.each(arrayName, function(indx,elem){
+								//console.log(elem + ' [' + indx + ']');
+								if(indx < nameSpaceLength -2){
+									newName += elem + '.';
+								} else if(indx == nameSpaceLength -1 ){
+									if(settings.bracketArray){
+										newName += '[' + rowNameIncrement + '].';
+									} else {
+										newName += '.' + rowNameIncrement + '.';
+									}								
+								} else {
+									newName += elem;
 								}
-							});	
-						}
-						//console.log(rowData)
+							});
+							
+							//console.log(newName);
+							$(element).attr('name',newName);
+							//$(element).attr('name',templateName + rowNameIncrement);
+							$(element).removeAttr('templateName');
+							
+							if(type != 'new' || type == 'populated'){
+								
+								$.each(rowData[increment], function(idx,elem){
+									//console.log(elem.name + '[' + idx + '] = "' + elem.value + '"');
+									if($(element).attr('name').split(".").pop() == elem.name.split(".").pop() && $(element).val() == elem.value){ //
+										// Check the selected radio and check boxes
+										$(element).prop('checked','checked');
+									}
+								});	
+							}
+							//console.log(cloneCount);
+							//console.log(rowData[increment]);
+						}						
 					}
 					
 					$(element).attr('id',formElementId + rowIdIncrement);
 					$(element).parent('label').attr('for',formElementId + rowIdIncrement);
 					
-				});				
+				});	
 			} 
 			
 			// Handle the for renaming for non radio and checkoxes
@@ -426,41 +485,91 @@
 						var formName = formTarget.attr('name');
 						var nameLength =  formTarget.attr('name').split(".").pop().length + 1;
 						formElementName = formName.substring(0,formName.length - nameLength);
+						var arrayName = formName.split(".");
+						var nameSpaceLength = formName.split(".").length -1;
+						//console.log(formTarget.attr('name').split(".").pop())
+						//console.log(nameSpaceLength);
+						//console.log('namespace length: ' + nameSpaceLength)
+						var newName = '';
+						$.each(arrayName, function(indx,elem){
+							//console.log(elem + ' [' + indx + ']');
+							if(indx < nameSpaceLength -2){
+								newName += elem + '.';
+							} else if(indx == nameSpaceLength -1 ){
+								if(hasBrackets(elem)){
+									newName += '.' + elem.replace(/\[.*?\]/, "") + '.' + '0.';	
+								} else {
+									newName += '.' + elem + '.';
+								}								
+							} else {
+								newName += elem;
+							}
+						});
+						//console.log(newName);
+						
 					}
 				}
 				// For template rows, make the name attribute into templateName so 
 				// hidden row does not mess with validation
-				formTarget.attr('templateName',formElementName);
+				formTarget.attr('templateName',newName);
+				//formTarget.attr('templateName',formElementName);
 				// remove the name attribute for template row
 				formTarget.removeAttr('name');
 				// clear the value for the template row
 				formTarget.val('');
 				
 			} else {
-				// Get the form element name
-				var formTemplateName  = formTarget.attr('templateName');
-				formTarget.attr('name',formTemplateName + rowNameIncrement);
-				// remove the name attribute for template row
-				formTarget.removeAttr('templateName');
-				if(type != 'new' || type == 'populated'){
-					$.each(rowData[rowNum], function(index,element){
-						if(element.name.match('^' + formTemplateName)){
-							formTarget.val(element.value);
-							formTarget.attr('value',element.value);
-							// check to see if form object is a select
-							if(formTarget.children('option').length > 0){
-								// lopp through the select options
-								formTarget.children('option').each(function(indx,elem){
-									// check for selected values
-									if($(elem).val() == formTarget.val()){
-										$(elem).attr('selected','selected');
-									}
-								});
-							}
-							//console.log(element.name + '[' + index + '] = "' + element.value + '"');
+				if(formTarget.attr('templateName')){
+					// Get the form element name
+					var formTemplateName = formTarget.attr('templateName');
+					//console.log(formTemplateName);
+					var arrayName = formTemplateName.split(".");
+					//console.log(arrayName);
+					var nameSpaceLength = formTemplateName.split(".").length -1;
+
+					//console.log('namespace length: ' + nameSpaceLength)
+					var newName = '';
+					$.each(arrayName, function(indx,elem){
+						//console.log(elem + ' [' + indx + ']');
+						if(indx < nameSpaceLength -2){
+							newName += elem + '.';
+						} else if(indx == nameSpaceLength -1 ){
+							if(settings.bracketArray){
+								newName += '[' + rowNameIncrement + '].';
+							} else {
+								newName += '.' + rowNameIncrement + '.';
+							}								
+						} else {
+							newName += elem;
 						}
-					});		
-				}
+					});
+					formTarget.attr('name',newName);
+					//formTarget.attr('name',formTemplateName + rowNameIncrement);
+					// remove the name attribute for template row
+					formTarget.removeAttr('templateName');
+					//console.log(increment)
+					if(type != 'new' || type == 'populated'){
+						$.each(rowData[increment], function(index,element){
+							//if(element.name.match('^' + formTemplateName)){
+							if(formTarget.attr('name').split(".").pop() == element.name.split(".").pop()){
+								formTarget.val(element.value);
+								formTarget.attr('value',element.value);
+								// check to see if form object is a select
+								if(formTarget.children('option').length > 0){
+									// lopp through the select options
+									formTarget.children('option').each(function(indx,elem){
+										// check for selected values
+										if($(elem).val() == formTarget.val()){
+											$(elem).attr('selected','selected');
+										}
+									});
+								}
+								//console.log(element.name + '[' + index + '] = "' + element.value + '"');
+							}
+						});		
+					}	
+				} 
+				
 			}
 			
 		}
