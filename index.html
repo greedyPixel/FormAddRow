@@ -392,7 +392,7 @@
 							<div class="col-md-4 form-group">
 								<label class="control-label" for="savings">Savings</label>
 								<div class="input-group col-md-12">
-									<input type="text" class="form-control" name="products.costs.0.savings" id="savings" placeholder="Savings" value="">
+									<input type="text" class="form-control readonly" name="products.costs.0.savings" id="savings" placeholder="Savings" value="0" readonly>
 								</div>
 							</div>
 						</div>
@@ -440,20 +440,14 @@
 				
 			},
 			cloned: function(data){
-				$('input[name$="retailCost"]').on('change blur keypress',function(e){
-					var actualCost = $(this).parentsUntil('.form-group').parent().parent().find('input[name$="actualCost"]').val();
-					var retailCost = $(this).val();
-					//if the letter is not digit then display error and don't type anything
-					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
-						return false;
+				$('input[name$="retailCost"],input[name$="actualCost"').on('change blur focus focusin focusout keypress propertychange input',function(e){
+					if($(this).attr('name').endsWith('retailCost')){
+						var actualCost = $(this).parentsUntil('.form-group').parent().parent().find('input[name$="actualCost"]').val();
+						var retailCost = $(this).val();
 					} else {
-						var savings = retailCost - actualCost;
-						$(this).parentsUntil('.form-group').parent().parent().find('input[name$="savings"]').val(savings);
+						var retailCost = $(this).parentsUntil('.form-group').parent().parent().find('input[name$="retailCost"]').val();
+						var actualCost = $(this).val();
 					}
-				});
-				$('input[name$="actualCost"]').on('change blur keypress',function(e){
-					var retailCost = $(this).parentsUntil('.form-group').parent().parent().find('input[name$="retailCost"]').val();
-					var actualCost = $(this).val();
 					//if the letter is not digit then display error and don't type anything
 					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
 						return false;
