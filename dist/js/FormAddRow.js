@@ -11,6 +11,7 @@
 			dataType: 'json',
 			title: '',
 			loaded: function(data){},
+			cloned: function(data){},
 			bracketArray: false,
 			destroy: false
         }, options );
@@ -291,6 +292,9 @@
 			} else {
 				elementsLoop('new',cloneCount);
 			}
+			
+			//Add after build functions
+			settings.cloned(rowData);
 			
 			//console.log(cloneCount);
 			return cloneCount;

@@ -372,6 +372,32 @@
 						</ul>
 					</div>
 				</div>
+				<hr>
+				<div id="calculationForm" class="addFormRowContainer">
+					<div class="addFormRow">
+						<input type="hidden" name="phoneId" id="phoneId" value="">
+						<div class="row">
+							<div class="col-md-4 form-group">
+								<label class="control-label" for="retailCost">Retail Cost</label>
+								<div class="input-group col-md-12">
+									<input type="text" class="form-control" name="products.costs.0.retailCost" id="retailCost" placeholder="Retail Cost" value="">
+								</div>
+							</div>
+							<div class="col-md-4 form-group">
+								<label class="control-label" for="actualCost">Actual Cost</label>
+								<div class="input-group col-md-12">
+									<input type="text" class="form-control" name="products.costs.0.actualCost" id="actualCost" placeholder="Actual Cost" value="">
+								</div>
+							</div>
+							<div class="col-md-4 form-group">
+								<label class="control-label" for="savings">Savings</label>
+								<div class="input-group col-md-12">
+									<input type="text" class="form-control" name="products.costs.0.savings" id="savings" placeholder="Savings" value="">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<hr>
@@ -405,6 +431,37 @@
 			destination: '#addressHtml',
 			loaded: function(){
 				
+			}
+		});
+		$('#calculationForm').FormAddRow({
+			title: "Cost(s)",
+			bracketArray: true,
+			loaded: function(data){
+				
+			},
+			cloned: function(data){
+				$('input[name$="retailCost"]').on('change blur keypress',function(e){
+					var actualCost = $(this).parentsUntil('.form-group').parent().parent().find('input[name$="actualCost"]').val();
+					var retailCost = $(this).val();
+					//if the letter is not digit then display error and don't type anything
+					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+						return false;
+					} else {
+						var savings = retailCost - actualCost;
+						$(this).parentsUntil('.form-group').parent().parent().find('input[name$="savings"]').val(savings);
+					}
+				});
+				$('input[name$="actualCost"]').on('change blur keypress',function(e){
+					var retailCost = $(this).parentsUntil('.form-group').parent().parent().find('input[name$="retailCost"]').val();
+					var actualCost = $(this).val();
+					//if the letter is not digit then display error and don't type anything
+					if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+						return false;
+					} else {
+						var savings = retailCost - actualCost;
+						$(this).parentsUntil('.form-group').parent().parent().find('input[name$="savings"]').val(savings);
+					}
+				});
 			}
 		});
 	});
