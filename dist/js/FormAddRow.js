@@ -36,6 +36,12 @@
 		var $totalRows = $(this).children('.addFormRow').length;
 		//console.log($totalRows);
 		
+		var assignObjectData = function(dataSource) {
+			if(settings.data != ''){
+				rowData = dataSource;
+				promise = buildTemplate().then(buildTemplateRow).then(buildExistingRows).then(afterRowsBuilt); 
+			}			
+		}
 		
 		if(settings.data.length == 0 && settings.url.length == 0){
 			if(settings.destroy){
@@ -52,6 +58,8 @@
 				// Add handlers to be called when the Deferred object is resolved, rejected, or still in progress.
 			} else if(settings.destroy){
 				promise = destroyThis().then(afterRowsBuilt);
+			} else if(settings.data.length > 0 && settings.url.length == 0){ // If the user passes just the data object as a variable
+				promise = assignObjectData(settings.data);
 			}
 		}
 		
@@ -70,6 +78,7 @@
 				promise = buildTemplate().then(buildTemplateRow).then(buildExistingRows).then(afterRowsBuilt); 
 			}			
 		}
+		
 		function getAjaxObject() {
 			var d = $.Deferred();
 			var iteration = 0;
@@ -159,10 +168,12 @@
 			var $thisContentRow = $($this).children('.addFormRow:first-child').html();
 
 			// Begin creating a copy of the original form as a template row that will be cloned to create additional rows.
-			var $template = '<div class="row"><div class="col-md-12"><div class="btn-group pull-right"><button type="button" class="btn btn-primary" id="add_' + $thisId + 'Row">+ Add</button></div>'
+			var $template = '<div class="row"><div class="col-md-12"><div class="btn-group pull-right"><button type="button" class="btn btn-primary" id="add_' + $thisId + 'Row">+ Add</button></div>';
+			
 			if(settings.title != ''){
 				$template += '<legend>' + settings.title + '</legend>';
 			}
+			
 			$template += '</div></div><ul class="list-group" id="' + $thisId + '_container">';
 			var templateRow = '<li data-index="0" class="list-group-item " id="' + $thisId + 'Row"><div class="row"><div class="col-xs-11">' + $thisContentRow + '</div><div class="col-xs-1 text-center"><button id="' + $thisId + 'Btn" type="button" class="btn btn-default deleteRow" title="Delete">X</button></div></div></li></ul>';
 			// empty the old html when done with it

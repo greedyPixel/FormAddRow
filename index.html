@@ -307,6 +307,38 @@
 						</div>
 					</div>
 				</div>
+				<div class="row" id="jsonDataForm">
+					<div class="col-md-12">
+						<h2>Add A Form Row Using JavaScript Object Variable Data </h2>
+						<div class="btn-group pull-right">
+							<button id="btnEmailForm" type="button" data-type="generate" class="btn btn-success btn-lg">Generate Form Add Row</button>
+						</div>
+					</div>
+				</div>
+				<div id="emailForm" class="addFormRowContainer">
+					<div class="addFormRow">
+						<input type="hidden" name="person.emails.0.emailsId" id="phoneId" value="">
+						<div class="row">
+							<div class="col-md-8 form-group">
+								<label class="control-label" for="phoneNumber">Email Address</label>
+								<div class="input-group col-md-12">
+									<input type="text" class="form-control" name="person.emails.0.emailAddress" id="phoneNumber" placeholder="Email Address" value="">
+								</div>
+							</div>
+							<div class="col-md-4 form-group">
+								<label class="control-label" for="phoneType">Email Type</label>
+								<div class="input-group col-md-12">
+									<select data-type="emailType" class="form-control" name="person.emails.0.emailType" id="phoneType">
+										<option value="" selected>Select a Email Type</option>
+										<option value="1">Government</option>
+										<option value="2">Commercial</option>
+										<option value="3">Personal</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 				<hr>
 				<div class="row" id="startedSection">
 					<div class="col-md-12">
@@ -418,6 +450,20 @@
 <script src="assets/js/helpers.js"></script>
 <script src="dist/js/FormAddRow.js"></script>
 <script type="text/javascript">
+	var emailData = [
+		[
+			{"name":"emailAddress","value":"george.washington@usa.gov"},
+			{"name":"emailType","value":"1"}
+		],
+		[
+			{"name":"emailAddress","value":"bill.gates@microsoft.com"},
+			{"name":"emailType","value":"2"}
+		],
+		[
+			{"name":"emailAddress","value":"zerocool@gmail.com"},
+			{"name":"emailType","value":"3"}
+		]
+	];
 	$( document ).ready(function() {
     	getStates('select[data-type="state"]','MD');
 		//getPhones();
@@ -458,6 +504,35 @@
 				});
 			}
 		});
+		$('#btnEmailForm').on('click', function(){
+			console.log(JSON.stringify(emailData));
+			var message1 = 'Generate Form Add Row';
+			var message2 = 'Destroy Form Add Row';
+			if($(this).attr('data-type') == 'generate'){ // Generate
+				$(this).attr('data-type','destroy');
+				$(this).removeClass('btn-success').addClass('btn-danger');
+				$(this).text(message2);
+				$('#emailForm').FormAddRow({
+					data: emailData,
+					title: "Email(s)",
+					bracketArray: true,
+					loaded: function(data){
+						/*$('#emailJson').empty();
+						var jsonObect = '<figure class="highlight"><pre><code class="language-html" data-lang="html">'
+							+ JSON.stringify(data)
+							+  '</code></pre></figure>';
+						$('#emailJson').append(jsonObect);*/
+					}
+				});
+			} else { // Destroy
+				$(this).attr('data-type','generate');
+				$(this).removeClass('btn-danger').addClass('btn-success');
+				$(this).text(message1);
+				$('#emailForm').FormAddRow({
+					destroy: true
+				});
+			}
+		});	
 	});
 	function getStates(target,selected){
 		if( typeof target === 'undefined' || target === null ){
