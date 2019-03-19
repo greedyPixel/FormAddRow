@@ -295,7 +295,7 @@
                     }
                 }
                 if (typeof thisRowContainer != 'undefined' || thisRowContainer != null) {
-
+                    
                 }
             });
             d.resolve();
@@ -320,14 +320,14 @@
             if (typeof increment === 'undefined' || increment === null) {
                 increment = 0; // Types are, template, new, populated
             }
-            //console.log($thisId);            
+            //console.log($thisId);
             // Start changing the IDs for all the content so that the elements can be cloned.
-            $('[id^="' + $thisId + '"]:last-child .row .far-contentColumn').children().each(function (index, element) {
-                //console.log($(element));                
+            $('#' + $thisId + 'Row:last-child .row .far-contentColumn').children().each(function (index, element) {
+                //console.log($(element));
                 var elementClass = $(element).attr('class');
                 if (elementClass == 'form-group') {
                     parseForm(element, increment, type);
-                    
+
                 } else {
                     // Parse through hidden fields
                     if ($(element).attr('type') == 'hidden') {
@@ -372,7 +372,7 @@
             }
             // add count
             cloneCount++;//$('#' + $thisId + '_container').length;
-            var newClone = $('#' + target + '_container li[data-index="0"]').clone(true).attr({ "data-index": cloneCount, "id": $thisId + 'Row' + cloneCount }).removeClass('hidden');
+            var newClone = $('#' + target + '_container li[data-index="0"]').clone(true).attr('data-index', cloneCount).removeClass('hidden');
             $('#' + target + '_container').append(newClone);
 
             //var thisTarget = $('[data-index="' + cloneCount + '"]');
@@ -382,15 +382,7 @@
             } else {
                 elementsLoop('new', cloneCount);
             }
-            //If there is an ID on a form group, add the count onto the ID
-            $('#' + target + '_container .form-group').each(function (index, element) {                
-                if (typeof $(element).attr('id') !== 'undefined' || $(element).attr('id') !== null) {
-                    if ($(element).attr('id') !== undefined){
-                        var newFormGroupID = $(element).attr('id') + cloneCount;
-                        $(element).attr('id', newFormGroupID);
-                    }                    
-                }
-            });
+
             //Add after build functions
             settings.cloned(rowData);
             //Launch tooltip for delete button
@@ -660,20 +652,17 @@
                             //if(element.name.match('^' + formTemplateName)){
                             if (formTarget.attr('name').split(".").pop() == element.name.split(".").pop()) {
                                 formTarget.val(element.value);
-                                formTarget.attr('value', element.value);                                
+                                formTarget.attr('value', element.value);
                                 // check to see if form object is a select
                                 if (formTarget.children('option').length > 0) {
                                     // lopp through the select options
                                     formTarget.children('option').each(function (indx, elem) {
                                         setTimeout(function () {
-                                            //console.log(formTarget)
-                                            //console.log($(elem).val())
                                             // check for selected values
                                             if ($(elem).val() == formTarget.val()) {
                                                 $(elem).attr('selected', 'selected');
-                                                formTarget.val(element.value);
                                             }
-                                        }, 100); 
+                                        }, 100);                                        
                                     });
                                 }
                                 //console.log(element.name + '[' + index + '] = "' + element.value + '"');
