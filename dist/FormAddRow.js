@@ -575,13 +575,29 @@
                                 }
                                 //console.log(cloneCount);
                                 //console.log(rowData[increment]);
+
+
                             }
                         }
 
                     }
                     if (type !== 'template') {
-                        $(element).attr('id', formElementId + rowIdIncrement);
-                        $(element).parent('label').attr('for', formElementId + rowIdIncrement);
+                        if ($(element).attr('id')) {
+                            if ($(element).attr('id').indexOf('_') > -1) {
+                                var formId = $(element).attr('id');
+                                var idLength = $(element).attr('id').split("_").pop().length + 1;
+                                formElementId = formId.substring(0, formId.length - idLength);
+                                if (formElementId !== '') {
+                                    console.log('formElementId: ' + formElementId)
+                                    $(element).attr('id', formElementId + rowIdIncrement);
+                                    $(element).parent('label').attr('for', formElementId + rowIdIncrement);
+                                }
+                            } else {
+                                formElementId = $(element).attr('id');
+                                $(element).attr('id', formElementId + rowIdIncrement);
+                                $(element).parent('label').attr('for', formElementId + rowIdIncrement);
+                            }
+                        }
                     }
                 });
             }
