@@ -206,7 +206,7 @@
                 $thisContentRow = '';
             }
             if ($thisContentRow != '') {
-                
+
                 //console.log($($this).children('.addFormRow:first-child').html())
                 // Begin creating a copy of the original form as a template row that will be cloned to create additional rows.
                 var $template = '<div class="row"><div class="col-md-12">';
@@ -238,9 +238,9 @@
                 // Hide the template row
                 $('li[data-index="0"]').addClass('hidden');
             }
-            
-            
-            
+
+
+
 
             d.resolve();
 
@@ -272,8 +272,8 @@
             $('.deleteRow').on('click', function (event) {
                 var thisRowContainer = $(this).parent('.far-buttonColumn').parent().parent('li:not(.hidden)').parent().attr('id');
                 var thisRowAdder = $('#' + thisRowContainer).parent().find('.far-addRowBtn');
-                
-                
+
+
                 //var thisRowIndex = $(this).parent('.far-buttonColumn').parent().parent().attr('data-index');
                 $(this).parentsUntil('li').parent().remove();
                 if (typeof thisRowContainer != 'undefined' && thisRowAdder != 'undefined') {
@@ -281,11 +281,22 @@
                     //Fix the indexing for each of the rows
                     $('#' + thisRowContainer + ' li').each(function (rowIndex, rowElement) {
                         if (!$(rowElement).hasClass('hidden')) {
+                            var newIndex = rowIndex - 1;
                             $(rowElement).find('input, select, textarea').each(function (index, element) {
-                                var newIndex = rowIndex - 1;
                                 var splitNameOne = $(element).attr('name').split('[');
                                 var splitNameTwo = splitNameOne[1].split(']');
                                 $(element).attr('name', splitNameOne[0] + '[' + newIndex + ']' + splitNameTwo[1]);
+
+                            });
+                            //If there is an ID on a form group, add the count onto the ID
+                            $(rowElement).find('.form-group').each(function (index, element) {
+                                if (typeof $(element).attr('id') !== 'undefined' || $(element).attr('id') !== null) {
+                                    if ($(element).attr('id') !== undefined) {
+                                        var splitIdOne = $(element).attr('id').split('_');
+                                        var newFormGroupID = splitIdOne[0] + '_' + newIndex;
+                                        $(element).attr('id', newFormGroupID);
+                                    }
+                                }
                             });
                         }
                     });
@@ -295,7 +306,7 @@
                     }
                 }
                 if (typeof thisRowContainer != 'undefined' || thisRowContainer != null) {
-                    
+
                 }
             });
             d.resolve();
@@ -320,14 +331,12 @@
             if (typeof increment === 'undefined' || increment === null) {
                 increment = 0; // Types are, template, new, populated
             }
-            //console.log($thisId);
             // Start changing the IDs for all the content so that the elements can be cloned.
-            $('#' + $thisId + 'Row:last-child .row .far-contentColumn').children().each(function (index, element) {
-                //console.log($(element));
+            $('#' + $thisId + '_container li[data-index="' + increment + '"] .row .far-contentColumn').children().each(function (index, element) {
+                //console.log($(element));                
                 var elementClass = $(element).attr('class');
                 if (elementClass == 'form-group') {
                     parseForm(element, increment, type);
-
                 } else {
                     // Parse through hidden fields
                     if ($(element).attr('type') == 'hidden') {
@@ -371,17 +380,49 @@
                 target = $thisId; // Types are new or populated
             }
             // add count
-            cloneCount++;//$('#' + $thisId + '_container').length;
-            var newClone = $('#' + target + '_container li[data-index="0"]').clone(true).attr('data-index', cloneCount).removeClass('hidden');
+            cloneCount = $('#' + $thisId + '_container li').length;
+
+            var newClone = $('#' + target + '_container li[data-index="0"]').clone(true).attr({ "data-index": cloneCount, "id": $thisId + 'Row' + cloneCount }).removeClass('hidden');
             $('#' + target + '_container').append(newClone);
 
             //var thisTarget = $('[data-index="' + cloneCount + '"]');
-
+            var increment = 0;
+            if ($('#' + $thisId + '_container li').length >= 1) {
+                increment = cloneCount - 1;
+            } else {
+                increment = cloneCount;
+            }
             if (existing) {
                 elementsLoop('populated', cloneCount);
             } else {
                 elementsLoop('new', cloneCount);
             }
+            var rowObject = $('#' + target + '_container li[data-index="' + cloneCount + '"]');
+
+
+
+            //$('#' + target + ' li').each(function (rowIndex, rowElement) {
+            if (rowObject.hasClass('hidden')) {
+                //If there is an ID on a form group, add the count onto the ID
+                $('#' + target + '_container li[data-index="' + cloneCount + '"] .form-group').each(function (index, element) {
+                    if (typeof $(element).attr('id') !== 'undefined' || $(element).attr('id') !== null) {
+                        if ($(element).attr('id') !== undefined) {
+                            var newFormGroupID = $(element).attr('id') + '_' + increment;
+                            $(element).attr('id', newFormGroupID);
+                        }
+                    }
+                });
+            } else {
+                $('#' + target + '_container li[data-index="' + cloneCount + '"] .form-group').each(function (index, element) {
+                    if (typeof $(element).attr('id') !== 'undefined' || $(element).attr('id') !== null) {
+                        if ($(element).attr('id') !== undefined) {
+                            var newFormGroupID = $(element).attr('id').split('_');
+                            $(element).attr('id', newFormGroupID[0] + '_' + increment);
+                        }
+                    }
+                });
+            }
+            //});
 
             //Add after build functions
             settings.cloned(rowData);
@@ -414,9 +455,7 @@
             if (typeof type === 'undefined' || type === null) {
                 type = 'new'; // Types are template, new, populated
             }
-
-
-
+            //console.log('TARGET: ' + $(target).attr('id'))
             // handle hidden inputs
             if ($(target).attr('type') == 'hidden') {
                 var formTarget = $(target);
@@ -425,16 +464,18 @@
             }
 
             var formElementId = '';
+            var rowIdIncrement = '';
+            var rowNameIncrement = '';
 
-            if (type == 'template') {
-                var rowIdIncrement = '';
-                var rowNameIncrement = '';
+            if (type === 'template') {
+                rowIdIncrement = '';
+                rowNameIncrement = '';
             } else {
                 if (increment >= 1) {
                     increment = cloneCount - 1;
                 }
-                var rowIdIncrement = '_' + increment;
-                var rowNameIncrement = '' + increment;
+                rowIdIncrement = '_' + increment;
+                rowNameIncrement = '' + increment;
             }
 
             function hasBrackets(str) {
@@ -448,7 +489,7 @@
                 $(target).find('input[type="radio"], input[type="checkbox"]').each(function (index, element) {
                     formElementId = $(element).attr('id');
 
-                    if (type == 'template') {
+                    if (type === 'template') {
                         var elementName = $(element).attr('name');
                         if ($(element).attr('name').indexOf('.') > -1) {
                             var formName = $(element).attr('name');
@@ -458,13 +499,15 @@
                             //console.log(nameSpaceLength);
                             //console.log('namespace length: ' + nameSpaceLength)
                             var newName = '';
+                            //console.log(arrayName);
                             $.each(arrayName, function (indx, elem) {
                                 //console.log(elem + ' [' + indx + ']');
                                 if (indx < nameSpaceLength - 2) {
                                     newName += elem + '.';
+
                                 } else if (indx == nameSpaceLength - 1) {
                                     if (hasBrackets(elem)) {
-                                        newName += '.' + elem.replace(/\[.*?\]/, "") + '.' + '0.';
+                                        newName += '' + elem.replace(/\[.*?\]/, "") + '.' + '0.';
                                     } else {
                                         newName += '.' + elem + '.';
                                     }
@@ -478,6 +521,7 @@
                             //console.log(elementName);
                         }
                         $(element).attr('templateName', newName);
+                        $(element).addClass('ignore');
                         //$(element).attr('templateName',elementName);
                         $(element).removeAttr('name');
                         $(element).removeAttr('checked');
@@ -490,90 +534,108 @@
                             }
                         }
                     } else {
-
-                        if ($(element).attr('templateName')) {
-                            var templateName = $(element).attr('templateName');
-                            var arrayName = $(element).attr('templateName').split(".");
-                            var nameSpaceLength = $(element).attr('templateName').split(".").length - 1;
-                            //console.log(templateName);
-                            //console.log('namespace length: ' + nameSpaceLength)
-                            var newName = '';
-                            $.each(arrayName, function (indx, elem) {
-                                //console.log(elem + ' [' + indx + ']');
-                                if (indx < nameSpaceLength - 2) {
-                                    newName += elem + '.';
-                                } else if (indx == nameSpaceLength - 1) {
-                                    if (settings.bracketArray) {
-                                        newName += '[' + rowNameIncrement + '].';
+                        if (type !== 'template') {
+                            if ($(element).attr('templateName')) {
+                                var templateName = $(element).attr('templateName');
+                                var arrayName = $(element).attr('templateName').split(".");
+                                var nameSpaceLength = $(element).attr('templateName').split(".").length - 1;
+                                //console.log(templateName);
+                                //console.log('namespace length: ' + nameSpaceLength)
+                                var newName = '';
+                                $.each(arrayName, function (indx, elem) {
+                                    //console.log(elem + ' [' + indx + ']');
+                                    if (indx < nameSpaceLength - 2) {
+                                        newName += elem + '.';
+                                    } else if (indx == nameSpaceLength - 1) {
+                                        if (settings.bracketArray) {
+                                            newName += '[' + rowNameIncrement + '].';
+                                        } else {
+                                            newName += '.' + rowNameIncrement + '.';
+                                        }
                                     } else {
-                                        newName += '.' + rowNameIncrement + '.';
-                                    }
-                                } else {
-                                    newName += elem;
-                                }
-                            });
-
-                            //console.log(newName);
-                            $(element).attr('name', newName);
-                            //$(element).attr('name',templateName + rowNameIncrement);
-                            $(element).removeAttr('templateName');
-
-                            if (type != 'new' || type == 'populated') {
-
-                                $.each(rowData[increment], function (idx, elem) {
-                                    //console.log(elem.name + '[' + idx + '] = "' + elem.value + '"');
-                                    if ($(element).attr('name').split(".").pop() == elem.name.split(".").pop() && $(element).val() == elem.value) { //
-                                        // Check the selected radio and check boxes
-                                        $(element).prop('checked', 'checked');
+                                        newName += elem;
                                     }
                                 });
+
+                                //console.log(newName);
+                                $(element).attr('name', newName);
+                                $(element).removeClass('ignore');
+                                //$(element).attr('name',templateName + rowNameIncrement);
+                                $(element).removeAttr('templateName');
+
+                                if (type != 'new' || type == 'populated') {
+
+                                    $.each(rowData[increment], function (idx, elem) {
+                                        //console.log(elem.name + '[' + idx + '] = "' + elem.value + '"');
+                                        if ($(element).attr('name').split(".").pop() == elem.name.split(".").pop() && $(element).val() == elem.value) { //
+                                            // Check the selected radio and check boxes
+                                            $(element).prop('checked', 'checked');
+                                        }
+                                    });
+                                }
+                                //console.log(cloneCount);
+                                //console.log(rowData[increment]);
                             }
-                            //console.log(cloneCount);
-                            //console.log(rowData[increment]);
+                        }
+
+                    }
+                    if (type !== 'template') {
+                        $(element).attr('id', formElementId + rowIdIncrement);
+                        $(element).parent('label').attr('for', formElementId + rowIdIncrement);
+                    }
+                });
+            }
+            if (type !== 'template') {
+                // Handle the for renaming for non radio and checkoxes
+                if ($(target).find('.control-label').attr('for')) {
+                    // Get the current ID
+                    //formElementId  = formTarget.attr('id');
+                    //console.log(formElementId);
+                    // Rename the ID and the for attribute for the label
+                    //formTarget.attr('id',formElementId + rowIdIncrement);
+                    if (formTarget.attr('id')) {
+                        if (formTarget.attr('id').indexOf('_') > -1) {
+                            var formId = formTarget.attr('id');
+                            var idLength = formTarget.attr('id').split("_").pop().length + 1;
+                            formElementId = formId.substring(0, formId.length - idLength);
+
+                            if (formElementId !== '') {
+                                //console.log('formElementId: ' + formElementId)
+                                formTarget.attr('id', formElementId + rowIdIncrement);
+                                $(target).find('.control-label').attr('for', formElementId + rowIdIncrement);
+                            }
+                        } else {
+                            formElementId = formTarget.attr('id');
+                            if (formElementId !== '') {
+                                //console.log('formElementId: ' + formElementId)
+                                formTarget.attr('id', formElementId);
+                                $(target).find('.control-label').attr('for', formElementId);
+                            }
+                        }
+
+                    }
+
+                } else {
+                    if (formTarget.attr('id')) {
+                        if (formTarget.attr('id').indexOf('_') > -1) {
+                            var formId = formTarget.attr('id');
+                            var idLength = formTarget.attr('id').split("_").pop().length + 1;
+                            formElementId = formId.substring(0, formId.length - idLength);
+                        } else {
+                            formElementId = formTarget.attr('id');
                         }
                     }
-
-                    $(element).attr('id', formElementId + rowIdIncrement);
-                    $(element).parent('label').attr('for', formElementId + rowIdIncrement);
-
-                });
-            } 
-
-            // Handle the for renaming for non radio and checkoxes
-            if ($(target).find('.control-label').attr('for')) {
-                // Get the current ID
-                //formElementId  = formTarget.attr('id');
-                //console.log(formElementId);
-                // Rename the ID and the for attribute for the label
-                //formTarget.attr('id',formElementId + rowIdIncrement);
-                if (formTarget.attr('id')) {
-                    if (formTarget.attr('id').indexOf('_') > -1) {
-                        var formId = formTarget.attr('id');
-                        var idLength = formTarget.attr('id').split("_").pop().length + 1;
-                        formElementId = formId.substring(0, formId.length - idLength);
-                    } else {
-                        formElementId = formTarget.attr('id');
+                    if (formElementId !== '') {
+                        //console.log('formElementId: ' + formElementId)
+                        formTarget.attr('id', formElementId + rowIdIncrement);
                     }
-                    formTarget.attr('id', formElementId + rowIdIncrement);
-                }
-                $(target).find('.control-label').attr('for', formElementId + rowIdIncrement);
-            } else {
-                if (formTarget.attr('id')) {
-                    if (formTarget.attr('id').indexOf('_') > -1) {
-                        var formId = formTarget.attr('id');
-                        var idLength = formTarget.attr('id').split("_").pop().length + 1;
-                        formElementId = formId.substring(0, formId.length - idLength);
-                    } else {
-                        formElementId = formTarget.attr('id');
-                    }
-                }
 
-                formTarget.attr('id', formElementId + rowIdIncrement);
+                }
             }
 
+
             // If template row, then strip the values
-            if (type == 'template') {
-                //console.log('template');
+            if (type === 'template') {
                 // Get the form element name
                 var formElementName = formTarget.attr('name');
                 if (formTarget.attr('name')) {
@@ -601,16 +663,15 @@
                                 }
                             } else {
                                 newName += elem;
-                                //console.log(newName);
                             }
                         });
-                        //console.log(newName);
 
                     }
                 }
                 // For template rows, make the name attribute into templateName so 
                 // hidden row does not mess with validation
                 formTarget.attr('templateName', newName);
+                formTarget.addClass('ignore');
                 //formTarget.attr('templateName',formElementName);
                 // remove the name attribute for template row
                 formTarget.removeAttr('name');
@@ -618,58 +679,65 @@
                 formTarget.val('');
 
             } else {
-                if (formTarget.attr('templateName')) {
-                    // Get the form element name
-                    var formTemplateName = formTarget.attr('templateName');
-                    //console.log(formTemplateName);
-                    var arrayName = formTemplateName.split(".");
-                    //console.log(arrayName);
-                    var nameSpaceLength = formTemplateName.split(".").length - 1;
-
-                    //console.log('namespace length: ' + nameSpaceLength)
-                    var newName = '';
-                    $.each(arrayName, function (indx, elem) {
-                        //console.log(elem + ' [' + indx + ']');
-                        if (indx < nameSpaceLength - 2) {
-                            newName += elem + '.';
-                        } else if (indx == nameSpaceLength - 1) {
-                            if (settings.bracketArray) {
-                                newName += '[' + rowNameIncrement + '].';
-                            } else {
-                                newName += '.' + rowNameIncrement + '.';
-                            }
-                        } else {
-                            newName += elem;
-                        }
-                    });
-                    formTarget.attr('name', newName);
-                    //formTarget.attr('name',formTemplateName + rowNameIncrement);
-                    // remove the name attribute for template row
-                    formTarget.removeAttr('templateName');
-                    //console.log(increment)
-                    if (type != 'new' || type == 'populated') {
-                        $.each(rowData[increment], function (index, element) {
-                            //if(element.name.match('^' + formTemplateName)){
-                            if (formTarget.attr('name').split(".").pop() == element.name.split(".").pop()) {
-                                formTarget.val(element.value);
-                                formTarget.attr('value', element.value);
-                                // check to see if form object is a select
-                                if (formTarget.children('option').length > 0) {
-                                    // lopp through the select options
-                                    formTarget.children('option').each(function (indx, elem) {
-                                        setTimeout(function () {
-                                            // check for selected values
-                                            if ($(elem).val() == formTarget.val()) {
-                                                $(elem).attr('selected', 'selected');
-                                            }
-                                        }, 100);                                        
-                                    });
+                if (type !== 'template') {
+                    if (formTarget.attr('templateName') && type !== 'template') {
+                        // Get the form element name
+                        var formTemplateName = formTarget.attr('templateName');
+                        //console.log(formTemplateName);
+                        var arrayName = formTemplateName.split(".");
+                        //console.log(arrayName);
+                        var nameSpaceLength = formTemplateName.split(".").length - 1;
+                        formTarget.removeClass('ignore');
+                        //console.log('namespace length: ' + nameSpaceLength)
+                        var newName = '';
+                        $.each(arrayName, function (indx, elem) {
+                            //console.log(elem + ' [' + indx + ']');
+                            if (indx < nameSpaceLength - 2) {
+                                newName += elem + '.';
+                            } else if (indx == nameSpaceLength - 1) {
+                                if (settings.bracketArray) {
+                                    newName += '[' + rowNameIncrement + '].';
+                                } else {
+                                    newName += '.' + rowNameIncrement + '.';
                                 }
-                                //console.log(element.name + '[' + index + '] = "' + element.value + '"');
+                            } else {
+                                newName += elem;
                             }
                         });
+                        formTarget.attr('name', newName);
+                        //formTarget.attr('name',formTemplateName + rowNameIncrement);
+                        // remove the name attribute for template row
+                        formTarget.removeAttr('templateName');
+                        //console.log(increment)
+                        if (type != 'new' || type == 'populated') {
+                            $.each(rowData[increment], function (index, element) {
+                                //if(element.name.match('^' + formTemplateName)){
+                                if (formTarget.attr('name').split(".").pop() == element.name.split(".").pop()) {
+                                    formTarget.val(element.value);
+                                    formTarget.attr('value', element.value);
+                                    // check to see if form object is a select
+                                    if (formTarget.children('option').length > 0) {
+                                        var thisTimer = index + 1;
+                                        // lopp through the select options
+                                        formTarget.children('option').each(function (indx, elem) {
+                                            setTimeout(function () {
+                                                //console.log(formTarget)
+                                                //console.log($(elem).val())
+                                                // check for selected values
+                                                if ($(elem).val() == formTarget.val()) {
+                                                    $(elem).attr('selected', 'selected');
+                                                    formTarget.val(element.value);
+                                                }
+                                            }, 500 * thisTimer);
+                                        });
+                                    }
+                                    //console.log(element.name + '[' + index + '] = "' + element.value + '"');
+                                }
+                            });
+                        }
                     }
                 }
+
 
             }
 
